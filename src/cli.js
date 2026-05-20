@@ -115,6 +115,12 @@ export default class CLI {
       if (!this._commands.content) {
         this._commands.content = (await import('./content/content.js')).default();
       }
+      for (const cmd of ['preview', 'publish', 'deploy']) {
+        if (!this._commands[cmd]) {
+          // eslint-disable-next-line no-await-in-loop
+          this._commands[cmd] = (await import(`./da/${cmd}.js`)).default();
+        }
+      }
     }
     return this;
   }

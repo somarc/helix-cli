@@ -23,7 +23,7 @@ import CLI from '../src/cli.js';
 import { checkNodeVersion } from '../src/config/config-utils.js';
 
 function runCLI(...args) {
-  const cmd = ['node', path.resolve(__rootdir, 'index.js'), ...args].join(' ');
+  const cmd = ['node', JSON.stringify(path.resolve(__rootdir, 'index.js')), ...args].join(' ');
   return shell.exec(cmd);
 }
 
