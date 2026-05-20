@@ -115,7 +115,7 @@ export default class CLI {
       if (!this._commands.content) {
         this._commands.content = (await import('./content/content.js')).default();
       }
-      for (const cmd of ['auth', 'preview', 'publish', 'deploy', 'route', 'index']) {
+      for (const cmd of ['auth', 'preview', 'publish', 'deploy', 'route', 'index', 'code']) {
         if (!this._commands[cmd]) {
           // eslint-disable-next-line no-await-in-loop
           this._commands[cmd] = (await import(`./da/${cmd}.js`)).default();

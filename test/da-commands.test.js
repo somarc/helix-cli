@@ -18,6 +18,7 @@ import deploy from '../src/da/deploy.js';
 import auth from '../src/da/auth.js';
 import route, { classifyRoute } from '../src/da/route.js';
 import index from '../src/da/index.js';
+import code from '../src/da/code.js';
 import {
   guardCommit,
   liveUrl,
@@ -135,6 +136,18 @@ describe('da index command', () => {
     assert.deepStrictEqual(
       registered.map((sub) => sub.command),
       ['show', 'validate', 'query <name>'],
+    );
+  });
+});
+
+describe('da code command', () => {
+  it('registers code subcommands', () => {
+    const cmd = code();
+    const { registered, chainable } = commandRecorder();
+    cmd.builder(chainable);
+    assert.deepStrictEqual(
+      registered.map((sub) => sub.command),
+      ['sync [path]', 'status [path]', 'job <jobId>', 'sidekick'],
     );
   });
 });

@@ -102,6 +102,25 @@ export class HelixAdminClient {
     );
   }
 
+  async codeSync(owner, repo, branch, daPath) {
+    return this._json(
+      `/code/${owner}/${repo}/${branch}/${helixPath(daPath)}`,
+      { method: 'POST' },
+    );
+  }
+
+  async codeStatus(owner, repo, branch, daPath) {
+    return this._json(`/code/${owner}/${repo}/${branch}/${helixPath(daPath)}`);
+  }
+
+  async job(jobId) {
+    return this._json(`/job/${jobId}/details`);
+  }
+
+  async sidekickConfig(owner, repo, branch) {
+    return this._json(`/sidekick/${owner}/${repo}/${branch}/config.json`);
+  }
+
   async _json(endpoint, opts = {}) {
     const res = await this.fetch(`${HELIX_ADMIN}${endpoint}`, {
       ...opts,
