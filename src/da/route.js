@@ -30,6 +30,28 @@ const EXIT_CODES = {
   'probe-failed': 5,
 };
 
+function addRoutePathOptions(yargs) {
+  return addProjectOptions(yargs)
+    .positional('path', {
+      describe: 'Route or DA source path.',
+      type: 'string',
+    });
+}
+
+function addRouteAuditOptions(yargs) {
+  return addProjectOptions(yargs)
+    .positional('prefix', {
+      describe: 'DA source path prefix.',
+      type: 'string',
+      default: '/',
+    })
+    .option('concurrency', {
+      describe: 'Max parallel probes.',
+      type: 'number',
+      default: 10,
+    });
+}
+
 async function probeSource(ctx, daPath) {
   const candidates = daPath.endsWith('.html') ? [daPath] : [`${daPath}.html`, daPath];
   for (const candidate of candidates) {
@@ -105,7 +127,7 @@ export default function route() {
         .command({
           command: 'classify <path>',
           description: 'Probe route ownership: contentbus | codebus | hybrid | orphan.',
-          builder: addProjectOptions,
+          builder: addRoutePathOptions,
           handler: async (argv) => {
             const ctx = await createDaContext(argv);
             const verdict = await classifyRoute(ctx, argv.path);
@@ -116,7 +138,7 @@ export default function route() {
         .command({
           command: 'canonical <path>',
           description: 'Show canonical route, preview/live URLs, and .plain.html URL.',
-          builder: addProjectOptions,
+          builder: addRoutePathOptions,
           handler: async (argv) => {
             const ctx = await createDaContext(argv);
             const verdict = await classifyRoute(ctx, argv.path);
@@ -139,11 +161,7 @@ export default function route() {
         .command({
           command: 'audit [prefix]',
           description: 'Classify every HTML source route under a DA path prefix.',
-          builder: (cmd) => addProjectOptions(cmd).option('concurrency', {
-            describe: 'Max parallel probes.',
-            type: 'number',
-            default: 10,
-          }),
+          builder: addRouteAuditOptions,
           handler: async (argv) => {
             const ctx = await createDaContext(argv);
             const paths = await resolvePathSet(ctx, argv.prefix || '/', { htmlOnly: true });

@@ -154,7 +154,11 @@ export default function index() {
         .command({
           command: 'query <name>',
           description: 'Run a query against a configured index.',
-          builder: addQueryOptions,
+          builder: (cmd) => addQueryOptions(cmd)
+            .positional('name', {
+              describe: 'Configured index name.',
+              type: 'string',
+            }),
           handler: async (argv) => {
             const [project, config] = await Promise.all([
               createProjectContext(argv),

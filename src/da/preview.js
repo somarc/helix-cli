@@ -29,6 +29,23 @@ function addBatchOptions(yargs) {
     });
 }
 
+function addPathOptions(yargs) {
+  return addProjectOptions(yargs)
+    .positional('path', {
+      describe: 'DA source path.',
+      type: 'string',
+    });
+}
+
+function addTreeOptions(yargs) {
+  return addBatchOptions(addProjectOptions(yargs))
+    .positional('prefix', {
+      describe: 'DA source path prefix.',
+      type: 'string',
+      default: '/',
+    });
+}
+
 async function previewOne(ctx, daPath) {
   try {
     await flushDaPreview(ctx, daPath);
@@ -52,7 +69,7 @@ export default function preview() {
         .command({
           command: 'page <path>',
           description: 'Preview one DA source document.',
-          builder: addProjectOptions,
+          builder: addPathOptions,
           handler: async (argv) => {
             const ctx = await createDaContext(argv);
             const result = await previewOne(ctx, argv.path);
@@ -63,7 +80,7 @@ export default function preview() {
         .command({
           command: 'tree [prefix]',
           description: 'Preview every HTML source document under a DA path prefix.',
-          builder: (cmd) => addBatchOptions(addProjectOptions(cmd)),
+          builder: addTreeOptions,
           handler: async (argv) => {
             const ctx = await createDaContext(argv);
             const paths = await resolvePathSet(ctx, argv.prefix || '/', { htmlOnly: true });
@@ -85,7 +102,7 @@ export default function preview() {
         .command({
           command: 'status <path>',
           description: 'Show Helix preview status for one path.',
-          builder: addProjectOptions,
+          builder: addPathOptions,
           handler: async (argv) => {
             const ctx = await createDaContext(argv);
             const result = await ctx.helixClient.previewStatus(

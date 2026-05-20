@@ -35,6 +35,23 @@ function addPublishOptions(yargs) {
   return addCommitOptions(addProjectOptions(yargs));
 }
 
+function addPublishPathOptions(yargs) {
+  return addPublishOptions(yargs)
+    .positional('path', {
+      describe: 'DA source path.',
+      type: 'string',
+    });
+}
+
+function addPublishTreeOptions(yargs) {
+  return addBatchOptions(addPublishOptions(yargs))
+    .positional('prefix', {
+      describe: 'DA source path prefix.',
+      type: 'string',
+      default: '/',
+    });
+}
+
 async function publishOne(ctx, daPath) {
   const result = await ctx.helixClient.live(ctx.owner, ctx.repo, ctx.branch, daPath);
   return {
@@ -53,7 +70,7 @@ export default function publish() {
         .command({
           command: 'page <path>',
           description: 'Publish one page. Requires --commit.',
-          builder: addPublishOptions,
+          builder: addPublishPathOptions,
           handler: async (argv) => {
             const project = await createProjectContext(argv);
             project.log.info(`Target: ${project.owner}/${project.repo}#${project.branch}`);
@@ -69,7 +86,7 @@ export default function publish() {
         .command({
           command: 'tree [prefix]',
           description: 'Publish every HTML source document under a DA path prefix. Requires --commit.',
-          builder: (cmd) => addBatchOptions(addPublishOptions(cmd)),
+          builder: addPublishTreeOptions,
           handler: async (argv) => {
             const ctx = await createDaContext(argv);
             const paths = await resolvePathSet(ctx, argv.prefix || '/', { htmlOnly: true });
@@ -95,7 +112,7 @@ export default function publish() {
         .command({
           command: 'unpublish <path>',
           description: 'Remove one page from *.aem.live. Requires --commit.',
-          builder: addPublishOptions,
+          builder: addPublishPathOptions,
           handler: async (argv) => {
             const project = await createProjectContext(argv);
             project.log.info(`Target: ${project.owner}/${project.repo}#${project.branch}`);

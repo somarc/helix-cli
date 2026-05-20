@@ -20,7 +20,11 @@ import {
 } from './shared.js';
 
 function addDeployOptions(yargs) {
-  return addCommitOptions(addProjectOptions(yargs));
+  return addCommitOptions(addProjectOptions(yargs))
+    .positional('path', {
+      describe: 'DA source path.',
+      type: 'string',
+    });
 }
 
 export default function deploy() {

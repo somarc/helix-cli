@@ -22,6 +22,32 @@ function addCodeWriteOptions(yargs) {
   return addCommitOptions(addProjectOptions(yargs));
 }
 
+function addCodePathOptions(yargs) {
+  return addCodeWriteOptions(yargs)
+    .positional('path', {
+      describe: 'Code-bus path.',
+      type: 'string',
+      default: '/',
+    });
+}
+
+function addCodeStatusOptions(yargs) {
+  return addProjectOptions(yargs)
+    .positional('path', {
+      describe: 'Code-bus path.',
+      type: 'string',
+      default: '/',
+    });
+}
+
+function addCodeJobOptions(yargs) {
+  return addProjectOptions(yargs)
+    .positional('jobId', {
+      describe: 'Helix Admin job ID.',
+      type: 'string',
+    });
+}
+
 export default function code() {
   return {
     command: 'code <subcommand>',
@@ -31,7 +57,7 @@ export default function code() {
         .command({
           command: 'sync [path]',
           description: 'Trigger code-bus sync for a path. Requires --commit.',
-          builder: addCodeWriteOptions,
+          builder: addCodePathOptions,
           handler: async (argv) => {
             const path = argv.path || '/';
             const project = await createProjectContext(argv);
@@ -46,7 +72,7 @@ export default function code() {
         .command({
           command: 'status [path]',
           description: 'Check code-bus sync status for a path.',
-          builder: addProjectOptions,
+          builder: addCodeStatusOptions,
           handler: async (argv) => {
             const path = argv.path || '/';
             const ctx = await createDaContext(argv);
@@ -56,7 +82,7 @@ export default function code() {
         .command({
           command: 'job <jobId>',
           description: 'Show an async Helix Admin job by ID.',
-          builder: addProjectOptions,
+          builder: addCodeJobOptions,
           handler: async (argv) => {
             const ctx = await createDaContext(argv);
             printResult(await ctx.helixClient.job(argv.jobId));
