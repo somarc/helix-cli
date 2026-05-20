@@ -17,6 +17,7 @@ import publish from '../src/da/publish.js';
 import deploy from '../src/da/deploy.js';
 import auth from '../src/da/auth.js';
 import route, { classifyRoute } from '../src/da/route.js';
+import index from '../src/da/index.js';
 import {
   guardCommit,
   liveUrl,
@@ -123,6 +124,18 @@ describe('da route command', () => {
     };
     const result = await classifyRoute(ctx, '/index');
     assert.strictEqual(result.ownership, 'codebus');
+  });
+});
+
+describe('da index command', () => {
+  it('registers index subcommands', () => {
+    const cmd = index();
+    const { registered, chainable } = commandRecorder();
+    cmd.builder(chainable);
+    assert.deepStrictEqual(
+      registered.map((sub) => sub.command),
+      ['show', 'validate', 'query <name>'],
+    );
   });
 });
 
