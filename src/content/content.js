@@ -16,6 +16,7 @@ import push from './push.js';
 import status from './status.js';
 import diff from './diff.js';
 import mergeCmd from './merge.js';
+import seed from './seed.js';
 
 export default function content() {
   return {
@@ -30,6 +31,7 @@ export default function content() {
         .command(status())
         .command(diff())
         .command(mergeCmd())
+        .command(seed())
         .demandCommand(1, 'You need at least one content subcommand.')
         .help();
     },

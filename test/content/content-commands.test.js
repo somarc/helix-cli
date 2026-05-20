@@ -20,6 +20,7 @@ import push from '../../src/content/push.js';
 import status from '../../src/content/status.js';
 import diff from '../../src/content/diff.js';
 import mergeCmd from '../../src/content/merge.js';
+import seed from '../../src/content/seed.js';
 
 describe('content()', () => {
   it('returns command named content', () => {
@@ -72,7 +73,12 @@ describe('clone()', () => {
   it('has a builder that registers path, all, token, force, and yes options', () => {
     const cmd = clone();
     const registered = {};
+    const positionals = {};
     const chainable = {
+      positional: (name, opts) => {
+        positionals[name] = opts;
+        return chainable;
+      },
       option: (name, opts) => {
         registered[name] = opts;
         return chainable;
@@ -134,6 +140,69 @@ describe('clone()', () => {
     assert.strictEqual(ranWith, 'abc');
     assert.strictEqual(assumeYesArg, true);
     assert.strictEqual(rootPathArg, '/ca/fr_ca');
+  });
+});
+
+describe('seed()', () => {
+  it('returns command named seed <directory>', () => {
+    const cmd = seed();
+    assert.strictEqual(cmd.command, 'seed <directory>');
+  });
+
+  it('has a description', () => {
+    const cmd = seed();
+    assert.ok(cmd.description && cmd.description.length > 0);
+  });
+
+  it('has a builder that registers owner, repo, path, token, commit, and dry-run options', () => {
+    const cmd = seed();
+    const registered = {};
+    const positionals = {};
+    const chainable = {
+      positional: (name, opts) => {
+        positionals[name] = opts;
+        return chainable;
+      },
+      option: (name, opts) => {
+        registered[name] = opts;
+        return chainable;
+      },
+      help: () => chainable,
+    };
+    cmd.builder(chainable);
+    assert.ok('directory' in positionals);
+    assert.ok('owner' in registered);
+    assert.ok('repo' in registered);
+    assert.ok('path' in registered);
+    assert.ok('token' in registered);
+    assert.ok('commit' in registered);
+    assert.ok('dry-run' in registered);
+  });
+
+  it('handler calls executor when set', async () => {
+    const cmd = seed();
+    let called = false;
+    cmd.executor = {
+      withDirectory: () => ({
+        withSourceDirectory: () => ({
+          withOwner: () => ({
+            withRepo: () => ({
+              withDestinationPath: () => ({
+                withToken: () => ({
+                  withCommit: () => ({
+                    run: async () => {
+                      called = true;
+                    },
+                  }),
+                }),
+              }),
+            }),
+          }),
+        }),
+      }),
+    };
+    await cmd.handler({ directory: 'seed', commit: false, dryRun: false });
+    assert.strictEqual(called, true);
   });
 });
 
