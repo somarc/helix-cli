@@ -10,3 +10,5 @@ logs
 test-results.xml
 .idea/
 .hlx
+
+.hlx/.da-token.json

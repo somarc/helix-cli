@@ -1,0 +1,113 @@
+{
+  "binary": "aem",
+  "environmentPrefix": "AEM_",
+  "globalOptions": [
+    "--log-file",
+    "--log-level",
+    "--version",
+    "--help"
+  ],
+  "commands": [
+    {
+      "command": "up",
+      "description": "Run the local AEM development server."
+    },
+    {
+      "command": "hack [hackathon]",
+      "description": "Run the inherited hackathon helper flow."
+    },
+    {
+      "command": "import",
+      "description": "Run the AEM import server."
+    },
+    {
+      "command": "content",
+      "description": "Manage DA-authored content.",
+      "subcommands": [
+        "clone",
+        "add [files..]",
+        "commit",
+        "push",
+        "status",
+        "diff [path]",
+        "merge [path]",
+        "seed <directory>"
+      ]
+    },
+    {
+      "command": "auth <subcommand>",
+      "description": "Authenticate with Adobe IMS for DA and Helix Admin operations.",
+      "subcommands": [
+        "login",
+        "logout",
+        "status",
+        "token"
+      ]
+    },
+    {
+      "command": "preview <subcommand>",
+      "description": "Trigger Edge Delivery preview builds on aem.page.",
+      "subcommands": [
+        "page <path>",
+        "tree [prefix]",
+        "status <path>"
+      ]
+    },
+    {
+      "command": "publish <subcommand>",
+      "description": "Promote previewed pages to aem.live.",
+      "subcommands": [
+        "page <path>",
+        "tree [prefix]",
+        "unpublish <path>"
+      ]
+    },
+    {
+      "command": "deploy <subcommand>",
+      "description": "Preview then publish Edge Delivery pages.",
+      "subcommands": [
+        "page <path>"
+      ]
+    },
+    {
+      "command": "route <subcommand>",
+      "description": "Classify DA route ownership and canonical delivery URLs.",
+      "subcommands": [
+        "classify <path>",
+        "canonical <path>",
+        "audit [prefix]"
+      ],
+      "ownershipStates": [
+        "contentbus",
+        "codebus",
+        "hybrid",
+        "orphan",
+        "probe-failed"
+      ]
+    },
+    {
+      "command": "index <subcommand>",
+      "description": "Inspect and query helix-query.yaml indices.",
+      "subcommands": [
+        "show",
+        "validate",
+        "query <name>"
+      ]
+    },
+    {
+      "command": "code <subcommand>",
+      "description": "Inspect and trigger Edge Delivery code-bus operations.",
+      "subcommands": [
+        "sync [path]",
+        "status [path]",
+        "job <jobId>",
+        "sidekick"
+      ],
+      "nestedSubcommands": {
+        "sidekick": [
+          "get"
+        ]
+      }
+    }
+  ]
+}

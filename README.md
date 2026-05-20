@@ -26,18 +26,26 @@ $ aem --help
 Usage: aem <command> [options]
 
 Commands:
-  aem up       Run a AEM development server
-  aem import   Run the AEM import server
-  aem content  Manage local da.live content
+  aem up                    Run a AEM development server
+  aem import                Run the AEM import server
+  aem content               Manage AEM content from da.live
+  aem auth <subcommand>     Authenticate with Adobe IMS for DA and Helix Admin
+                            operations
+  aem preview <subcommand>  Trigger Edge Delivery preview builds on *.aem.page
+  aem publish <subcommand>  Promote previewed pages to *.aem.live
+  aem deploy <subcommand>   Preview then publish Edge Delivery pages
+  aem route <subcommand>    Classify DA route ownership and canonical delivery
+                            URLs
+  aem index <subcommand>    Inspect and query helix-query.yaml indices
+  aem code <subcommand>     Inspect and trigger Edge Delivery code-bus
+                            operations
 
 Options:
-  --version                Show version number                         [boolean]
   --log-file, --logFile    Log file (use "-" for stdout)  [array] [default: "-"]
   --log-level, --logLevel  Log level
         [string] [choices: "silly", "debug", "verbose", "info", "warn", "error"]
                                                                [default: "info"]
-  --tls-key, --tlsKey      Path to .key file (for enabling TLS)        [string]
-  --tls-cert, --tlsCert    Path to .pem file (for enabling TLS)        [string]
+  --version                Show version number                         [boolean]
   --help                   Show help                                   [boolean]
 
 use <command> --help to get command specific details.
@@ -206,17 +214,48 @@ Read the full AEM Importer [documentation](https://github.com/adobe/helix-import
 
 ## Managing content
 
-The `aem content` commands let you check out content from da.live locally, make bulk edits, and push changes back. The local content lives in a `content/` folder in your project.
+The `aem content` commands let you check out content from da.live locally, make bulk edits, seed authored source documents, and push changes back. The local content lives in a `content/` folder in your project.
 
 | Command | Description |
 |---------|-------------|
 | `aem content clone` | Clone da.live content locally into `content/` |
+| `aem content seed <directory>` | Seed local authored documents into da.live source storage |
 | `aem content status` | Show locally added, modified, and deleted content files |
 | `aem content diff` | Show diff between local and remote content |
 | `aem content merge` | Merge remote content into local files |
 | `aem content add` | Stage changes in `content/` (like `git add`) |
 | `aem content commit` | Commit staged changes in `content/` (like `git commit`) |
 | `aem content push` | Push committed `content/` changes to da.live (use `content add` & `content commit` first) |
+
+### Content bus and code bus
+
+EDS authored content belongs in DA source storage. Pages, nav, footer, and authored fragments should be created through DA APIs with commands such as `aem content seed`, `aem content clone`, and `aem content push`.
+
+The Git repository owns implementation assets: blocks, CSS, JavaScript, tools, media, tests, and configuration. Do not add authored site pages as static HTML in a project repo unless the route is intentionally a Git-backed tool or asset.
+
+Use route diagnostics when ownership is unclear:
+
+```bash
+aem route classify /getting-started --owner <owner> --repo <repo>
+aem route canonical /getting-started --owner <owner> --repo <repo>
+```
+
+### DA and Helix Admin commands
+
+The DA extension surface is designed to be read-only or dry-run first. Remote mutations are explicit and use `--commit` where live, code-bus, or seed writes are involved.
+
+| Command family | Purpose |
+|----------------|---------|
+| `aem auth login/status/token/logout` | Cache and inspect DA bearer tokens |
+| `aem content clone/add/commit/push/status/diff/merge/seed` | Work with authored source in DA |
+| `aem preview page/tree/status` | Build DA-authored pages on `aem.page` |
+| `aem publish page/tree/unpublish` | Promote or remove pages on `aem.live`; requires `--commit` |
+| `aem deploy page` | Preview then publish one route when `--commit` is supplied |
+| `aem route classify/canonical/audit` | Identify content-bus, code-bus, hybrid, orphan, or failed routes |
+| `aem index show/validate/query` | Inspect and query `helix-query.yaml` delivery indexes |
+| `aem code sync/status/job/sidekick get` | Inspect and trigger Helix Admin code-bus operations |
+
+The machine-readable command inventory lives at `docs/cli-surface.json`. Keep it in sync with command registration and README/docs content when changing the CLI surface.
 
 ### Local content serving
 
@@ -314,4 +353,3 @@ To solve, first uninstall the old version, then install again with the new name:
 npm uninstall -g @adobe/helix-cli
 npm install -g @adobe/aem-cli
 ```
-
