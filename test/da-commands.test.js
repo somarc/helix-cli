@@ -15,6 +15,8 @@ import assert from 'assert';
 import preview from '../src/da/preview.js';
 import publish from '../src/da/publish.js';
 import deploy from '../src/da/deploy.js';
+import auth from '../src/da/auth.js';
+import route, { classifyRoute } from '../src/da/route.js';
 import {
   guardCommit,
   liveUrl,
@@ -46,6 +48,18 @@ describe('da preview command', () => {
   });
 });
 
+describe('da auth command', () => {
+  it('registers auth subcommands', () => {
+    const cmd = auth();
+    const { registered, chainable } = commandRecorder();
+    cmd.builder(chainable);
+    assert.deepStrictEqual(
+      registered.map((sub) => sub.command),
+      ['login', 'logout', 'status', 'token'],
+    );
+  });
+});
+
 describe('da publish command', () => {
   it('registers publish subcommands', () => {
     const cmd = publish();
@@ -64,6 +78,51 @@ describe('da deploy command', () => {
     const { registered, chainable } = commandRecorder();
     cmd.builder(chainable);
     assert.deepStrictEqual(registered.map((sub) => sub.command), ['page <path>']);
+  });
+});
+
+describe('da route command', () => {
+  it('registers route subcommands', () => {
+    const cmd = route();
+    const { registered, chainable } = commandRecorder();
+    cmd.builder(chainable);
+    assert.deepStrictEqual(
+      registered.map((sub) => sub.command),
+      ['classify <path>', 'canonical <path>', 'audit [prefix]'],
+    );
+  });
+
+  it('classifies DA-backed routes as contentbus', async () => {
+    const ctx = {
+      owner: 'owner',
+      repo: 'repo',
+      branch: 'main',
+      daClient: { getSource: async () => ({ ok: true }) },
+      helixClient: {
+        previewStatus: async () => ({
+          preview: { status: 200, sourceLocation: 'https://content.da.live/owner/repo/index.html' },
+        }),
+      },
+    };
+    const result = await classifyRoute(ctx, '/index');
+    assert.strictEqual(result.ownership, 'contentbus');
+    assert.strictEqual(result.sourcePath, '/index.html');
+  });
+
+  it('classifies code-backed routes as codebus', async () => {
+    const ctx = {
+      owner: 'owner',
+      repo: 'repo',
+      branch: 'main',
+      daClient: { getSource: async () => null },
+      helixClient: {
+        previewStatus: async () => ({
+          preview: { status: 200, sourceLocation: 'https://github.com/owner/repo/index.html' },
+        }),
+      },
+    };
+    const result = await classifyRoute(ctx, '/index');
+    assert.strictEqual(result.ownership, 'codebus');
   });
 });
 

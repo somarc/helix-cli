@@ -24,7 +24,7 @@ function helixPath(daPath) {
   return normalizeDaPath(daPath).replace(/\.html$/i, '').replace(/^\//, '') || 'index';
 }
 
-function canonicalWebPath(daPath) {
+export function canonicalWebPath(daPath) {
   const stripped = normalizeDaPath(daPath).replace(/\.html$/i, '');
   if (stripped === '/index') {
     return '/';
@@ -224,4 +224,10 @@ export function previewUrl(owner, repo, branch, daPath) {
 
 export function liveUrl(owner, repo, branch, daPath) {
   return `https://${branch}--${repo}--${owner}.aem.live${canonicalWebPath(daPath)}`;
+}
+
+export function plainHtmlUrl(owner, repo, branch, daPath) {
+  const stripped = normalizeDaPath(daPath).replace(/\.html$/i, '');
+  const segment = stripped === '/' ? '/index' : stripped;
+  return `https://${branch}--${repo}--${owner}.aem.page${segment}.plain.html`;
 }
