@@ -16,7 +16,7 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Use Node.js 24.x
         uses: actions/setup-node@v6
         with:
@@ -24,13 +24,20 @@ jobs:
       - run: npm i
 
       # Sub-project setup and testing (conditional)
+      - name: Cache Playwright browsers
+        if: hashFiles('packages/browser-injectables/**') != ''
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('packages/browser-injectables/package-lock.json') }}
+
       - name: Install browser injectable dependencies
         if: hashFiles('packages/browser-injectables/**') != ''
         run: cd packages/browser-injectables && npm ci
 
-      - name: Install Playwright dependencies for browser injectables
+      - name: Install Playwright browsers (chromium, firefox, webkit)
         if: hashFiles('packages/browser-injectables/**') != ''
-        run: cd packages/browser-injectables && npx playwright install-deps
+        run: cd packages/browser-injectables && npx playwright install --with-deps chromium firefox webkit
 
       - run: git config --global user.email "test@project-helix.io" && git config --global user.name "Test Build"
       - run: git config --global protocol.file.allow always
@@ -44,7 +51,7 @@ jobs:
         if: hashFiles('packages/browser-injectables/**') != ''
         run: cd packages/browser-injectables && npm test
 
-      - uses: codecov/codecov-action@v6
+      - uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/lcov.info,./packages/browser-injectables/coverage/lcov.info
@@ -62,7 +69,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - run: git config --global core.autocrlf false
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Use Node.js 24.x
         uses: actions/setup-node@v6
         with:
@@ -82,13 +89,13 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: [test, test_win]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - name: Use Node.js 24.11 (LTS)
         uses: actions/setup-node@v6
         with:
-          node-version: '24.15.0'
+          node-version: '24.17.0'
       - run: npm i
       - name: Check npm version
         run: npm --version
